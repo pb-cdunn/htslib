@@ -320,7 +320,7 @@ typedef struct {
     int32_t ref_seq_start;  /* if content_type == MAPPED_SLICE */
     int32_t ref_seq_span;   /* if content_type == MAPPED_SLICE */
     int32_t num_records;
-    int64_t record_counter;
+    int32_t record_counter;
     int32_t num_blocks;
     int32_t num_content_ids;
     int32_t *block_content_ids;
@@ -344,7 +344,7 @@ typedef struct {
     int32_t  ref_seq_id;
     int32_t  ref_seq_start;
     int32_t  ref_seq_span;
-    int64_t  record_counter;
+    int32_t  record_counter;
     int64_t  num_bases;
     int32_t  num_records;
     int32_t  num_blocks;
@@ -524,6 +524,9 @@ typedef struct cram_slice {
     /* State used during encoding/decoding */
     int last_apos, max_apos;
 
+    /* Identifier used for auto-assigning read names */
+    uint64_t id;
+
     /* Array of decoded cram records */
     cram_record *crecs;
 
@@ -657,7 +660,8 @@ typedef struct cram_fd {
     SAM_hdr       *header;
 
     char          *prefix;
-    int64_t        record_counter;
+    int            record_counter;
+    int            slice_num;
     int            err;
 
     // Most recent compression header decoded

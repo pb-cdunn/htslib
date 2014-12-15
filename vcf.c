@@ -88,9 +88,8 @@ int bcf_hdr_add_sample(bcf_hdr_t *h, const char *s)
     return 0;
 }
 
-int bcf_hdr_parse_sample_line(bcf_hdr_t *h, const char *str)
+void bcf_hdr_parse_sample_line(bcf_hdr_t *h, const char *str)
 {
-    int ret = 0;
     int i = 0;
     const char *p, *q;
     // add samples
@@ -100,14 +99,13 @@ int bcf_hdr_parse_sample_line(bcf_hdr_t *h, const char *str)
             char *s = (char*)malloc(q - p + 1);
             strncpy(s, p, q - p);
             s[q - p] = 0;
-            if ( bcf_hdr_add_sample(h,s) < 0 ) ret = -1;
+            bcf_hdr_add_sample(h,s);
             free(s);
         }
         if (*q == 0 || *q == '\n') break;
         p = q + 1;
     }
     bcf_hdr_add_sample(h,NULL);
-    return ret;
 }
 
 int bcf_hdr_sync(bcf_hdr_t *h)
@@ -179,7 +177,7 @@ bcf_hrec_t *bcf_hrec_dup(bcf_hrec_t *hrec)
         if ( hrec->vals[i] ) out->vals[j] = strdup(hrec->vals[i]);
         j++;
     }
-    if ( i!=j ) out->nkeys -= i-j;   // IDX was omitted
+    if ( i!=j ) out->nkeys--;   // IDX was omitted
     return out;
 }
 
@@ -451,7 +449,7 @@ int bcf_hdr_register_hrec(bcf_hdr_t *hdr, bcf_hrec_t *hrec)
         if ( kh_val(d, k).hrec[info&0xf] ) return 0;
         kh_val(d, k).info[info&0xf] = info;
         kh_val(d, k).hrec[info&0xf] = hrec;
-        if ( idx==-1 ) hrec_add_idx(hrec, kh_val(d, k).id);
+        hrec_add_idx(hrec, kh_val(d, k).id);
         return 1;
     }
     kh_val(d, k) = bcf_idinfo_def;
@@ -583,10 +581,10 @@ int bcf_hdr_parse(bcf_hdr_t *hdr, char *htxt)
         needs_sync += bcf_hdr_add_hrec(hdr, hrec);
         p += len;
     }
-    int ret = bcf_hdr_parse_sample_line(hdr,p);
+    bcf_hdr_parse_sample_line(hdr,p);
     bcf_hdr_sync(hdr);
     bcf_hdr_check_sanity(hdr);
-    return ret;
+    return 0;
 }
 
 int bcf_hdr_append(bcf_hdr_t *hdr, const char *line)
@@ -1562,15 +1560,7 @@ int _vcf_parse_format(kstring_t *s, const bcf_hdr_t *h, bcf1_t *v, char *p, char
                 if (fmt[j].max_l < l - 1) fmt[j].max_l = l - 1;
                 if (fmt[j].is_gt && fmt[j].max_g < g) fmt[j].max_g = g;
                 l = 0, m = g = 1;
-                if ( *r==':' ) 
-                {
-                    j++;
-                    if ( j>=v->n_fmt ) 
-                    { 
-                        fprintf(stderr,"Incorrect number of FORMAT fields at %s:%d\n", h->id[BCF_DT_CTG][v->rid].key,v->pos+1);
-                        exit(1); 
-                    }
-                }
+                if ( *r==':' ) j++;
                 else break;
             }
             else if ( *r== ',' ) m++;
@@ -1834,7 +1824,6 @@ int vcf_parse(kstring_t *s, const bcf_hdr_t *h, bcf1_t *v)
                         for (end = val; *end != ';' && *end != 0; ++end);
                         c = *end; *end = 0;
                     } else end = r;
-                    if ( !*key ) { if (c==0) break; r = end; key = r + 1; continue; }  // faulty VCF, ";;" in the INFO
                     k = kh_get(vdict, d, key);
                     if (k == kh_end(d) || kh_val(d, k).info[BCF_HL_INFO] == 15)
                     {
@@ -2256,11 +2245,6 @@ int bcf_hdr_combine(bcf_hdr_t *dst, const bcf_hdr_t *src)
                 if ( (kh_val(d_src,k_src).info[rec->type]>>8 & 0xf) != (kh_val(d_dst,k_dst).info[rec->type]>>8 & 0xf) )
                 {
                     fprintf(stderr,"Warning: trying to combine \"%s\" tag definitions of different lengths\n", src->hrec[i]->vals[0]);
-                    ret |= 1;
-                }
-                if ( (kh_val(d_src,k_src).info[rec->type]>>4 & 0xf) != (kh_val(d_dst,k_dst).info[rec->type]>>4 & 0xf) )
-                {
-                    fprintf(stderr,"Warning: trying to combine \"%s\" tag definitions of different types\n", src->hrec[i]->vals[0]);
                     ret |= 1;
                 }
             }

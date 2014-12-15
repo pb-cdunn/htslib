@@ -26,12 +26,16 @@ CC     = gcc
 AR     = ar
 RANLIB = ranlib
 
-CPPFLAGS = -I.
+ZLIB_ROOT=../../../../../../prebuilt.out/zlib/zlib-1.2.5/ubuntu-1004/
+ZLIB_INC=$(ZLIB_ROOT)/include
+ZLIB_DIR=$(ZLIB_ROOT)/lib
+
+CPPFLAGS = -I. -I$(ZLIB_INC)
 # TODO: probably update cram code to make it compile cleanly with -Wc++-compat
 CFLAGS   = -g -Wall -O2
 EXTRA_CFLAGS_PIC = -fpic
 LDFLAGS  =
-LDLIBS   =
+LDLIBS   = -L$(ZLIB_DIR)
 
 # For now these don't work too well as samtools also needs to know to
 # add -lbz2 and -llzma if linking against the static libhts.a library.
