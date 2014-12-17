@@ -27,8 +27,8 @@ AR     = ar
 RANLIB = ranlib
 
 ZLIB_ROOT=../../../../../../prebuilt.out/zlib/zlib-1.2.5/ubuntu-1004/
-ZLIB_INC=$(ZLIB_ROOT)/include
-ZLIB_DIR=$(ZLIB_ROOT)/lib
+ZLIB_INC?=$(ZLIB_ROOT)/include
+ZLIB_DIR?=$(ZLIB_ROOT)/lib
 
 CPPFLAGS = -I. -I$(ZLIB_INC)
 # TODO: probably update cram code to make it compile cleanly with -Wc++-compat
