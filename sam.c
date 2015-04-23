@@ -370,7 +370,14 @@ int bam_write1(BGZF *fp, const bam1_t *b)
     x[5] = c->mtid;
     x[6] = c->mpos;
     x[7] = c->isize;
+
+//    fprintf(stderr, "[bam_write1] About to try flush on %d bytes\n", 4+block_len);
+
     ok = (bgzf_flush_try(fp, 4 + block_len) >= 0);
+
+//    fprintf(stderr, "[bam_write1] Try flush complete. Ok: %d\n", ok);
+
+
     if (fp->is_be) {
         for (i = 0; i < 8; ++i) ed_swap_4p(x + i);
         y = block_len;
@@ -379,9 +386,19 @@ int bam_write1(BGZF *fp, const bam1_t *b)
     } else {
         if (ok) ok = (bgzf_write(fp, &block_len, 4) >= 0);
     }
+
+//    fprintf(stderr, "[bam_write1] Wrote block length. Ok: %d\n", ok);
+
     if (ok) ok = (bgzf_write(fp, x, 32) >= 0);
+
+//    fprintf(stderr, "[bam_write1] Wrote core data. Ok: %d\n", ok);
+
     if (ok) ok = (bgzf_write(fp, b->data, b->l_data) >= 0);
+
+//    fprintf(stderr, "[bam_write1] Wrote variable-length. Ok: %d\n", ok);
+
     if (fp->is_be) swap_data(c, b->l_data, b->data, 0);
+
     return ok? 4 + block_len : -1;
 }
 
@@ -1033,7 +1050,6 @@ int sam_format1(const bam_hdr_t *h, const bam1_t *b, kstring_t *str)
                 ksprintf(str, "f:%g", *(float*)s);
                 s += 4;
             } else return -1;
-
         } else if (type == 'd') {
             if (s+8 <= b->data + b->l_data) {
                 ksprintf(str, "d:%g", *(double*)s);
