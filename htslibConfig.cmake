@@ -54,7 +54,7 @@ add_custom_target(
 add_library(htslib STATIC IMPORTED)
 add_dependencies(htslib htslibSrc)
 endif()
-# target_include_directories(htslib   
+# target_include_directories(htslib
 #     INTERFACE
 #     ${htslib_IncludeDir}
 # )
