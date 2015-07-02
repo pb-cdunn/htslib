@@ -224,7 +224,7 @@ libhts.dylib: $(LIBHTS_OBJS)
 
 # Windows build under MinGW
 # http://stackoverflow.com/questions/5674613/compiling-a-dynamically-linked-library
-# -shared -Wl,--out-implib,libfile.a -o file.dll file.o
+# -shared -Wl,--out-implib,libfile.a -o file.dll file.o 
 libhts.dll: $(LIBHTS_OBJS)
 	$(CC) -shared -Wl,--out-implib,libhts.dll.a -pthread $(LDFLAGS) -o $@ $(LIBHTS_OBJS) $(LDLIBS)
 
