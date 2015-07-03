@@ -33,7 +33,7 @@ ZLIB_DIR      ?= $(ZLIB_ROOT)/lib
 
 CPPFLAGS = -I. -I$(ZLIB_INC)
 # TODO: probably update cram code to make it compile cleanly with -Wc++-compat
-CFLAGS   = -g -Wall -O2 -Wno-unused-function
+CFLAGS   = -Wall -O2 -Wno-unused-function
 EXTRA_CFLAGS_PIC = -fpic
 LDFLAGS  =
 LDLIBS   = -L$(ZLIB_DIR)  -lz -lm
